@@ -1,7 +1,7 @@
 /* Gratefully copied from https://github.com/brentvatne/react-native-animated-demo-tinder */
 
-
-import React, { Component } from "react";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import {
   StyleSheet,
@@ -72,35 +72,36 @@ let guid = 0;
 export default class SwipeCards extends Component {
 
   static propTypes = {
-    cards: React.PropTypes.array,
-    initial_index: React.PropTypes.number,
-    cardKey: React.PropTypes.string,
-    hasMaybeAction: React.PropTypes.bool,
-    loop: React.PropTypes.bool,
-    onLoop: React.PropTypes.func,
-    allowGestureTermination: React.PropTypes.bool,
-    stack: React.PropTypes.bool,
-    stackDepth: React.PropTypes.number,
-    stackOffsetX: React.PropTypes.number,
-    stackOffsetY: React.PropTypes.number,
-    renderNoMoreCards: React.PropTypes.func,
-    showYup: React.PropTypes.bool,
-    showMaybe: React.PropTypes.bool,
-    showNope: React.PropTypes.bool,
-    handleYup: React.PropTypes.func,
-    handleMaybe: React.PropTypes.func,
-    handleNope: React.PropTypes.func,
-    yupText: React.PropTypes.string,
-    yupView: React.PropTypes.element,
-    maybeText: React.PropTypes.string,
-    maybeView: React.PropTypes.element,
-    noText: React.PropTypes.string,
-    noView: React.PropTypes.element,
-    onClickHandler: React.PropTypes.func,
-    renderCard: React.PropTypes.func,
-    cardRemoved: React.PropTypes.func,
-    dragY: React.PropTypes.bool,
-    smoothTransition: React.PropTypes.bool
+    initial_index: PropTypes.number,
+    cards: PropTypes.array,
+    cardKey: PropTypes.string,
+    hasMaybeAction: PropTypes.bool,
+    loop: PropTypes.bool,
+    onLoop: PropTypes.func,
+    allowGestureTermination: PropTypes.bool,
+    stack: PropTypes.bool,
+    stackGuid: PropTypes.string,
+    stackDepth: PropTypes.number,
+    stackOffsetX: PropTypes.number,
+    stackOffsetY: PropTypes.number,
+    renderNoMoreCards: PropTypes.func,
+    showYup: PropTypes.bool,
+    showMaybe: PropTypes.bool,
+    showNope: PropTypes.bool,
+    handleYup: PropTypes.func,
+    handleMaybe: PropTypes.func,
+    handleNope: PropTypes.func,
+    yupText: PropTypes.string,
+    yupView: PropTypes.element,
+    maybeText: PropTypes.string,
+    maybeView: PropTypes.element,
+    nopeText: PropTypes.string,
+    noView: PropTypes.element,
+    onClickHandler: PropTypes.func,
+    renderCard: PropTypes.func,
+    cardRemoved: PropTypes.func,
+    dragY: PropTypes.bool,
+    smoothTransition: PropTypes.bool
   };
 
   static defaultProps = {
@@ -154,16 +155,19 @@ export default class SwipeCards extends Component {
     this.cardAnimation = null;
 
     this._panResponder = PanResponder.create({
-      onStartShouldSetPanResponderCapture: (e, gestureState) => {
+     onStartShouldSetPanResponderCapture: (e, gestureState) => {
         this.props.onDragStart();
         this.lastX = gestureState.moveX;
         this.lastY = gestureState.moveY;
         return false;
       },
-      onMoveShouldSetPanResponderCapture: (e, gestureState) => {
-        if (Math.abs(gestureState.dx) < Math.abs(gestureState.dy)) return false;
-        if ((gestureState.dx === 0) && (gestureState.dy === 0)) return false;
-        return (Math.abs(this.lastX - gestureState.moveX) > 5 || Math.abs(this.lastY - gestureState.moveY) > 5);
+
+     onMoveShouldSetPanResponderCapture: (e, gestureState) => {
+        if (Math.abs(gestureState.dx) > 3 || Math.abs(gestureState.dy) > 3) {
+          this.props.onDragStart();
+          return true;
+        }
+        return false;
       },
 
       onPanResponderGrant: (e, gestureState) => {
@@ -473,11 +477,11 @@ export default class SwipeCards extends Component {
     if (this.props.showNope) {
       const inner = this.props.noView
         ? this.props.noView
-        : <Text style={styles.nopeText}>{this.props.nopeText}</Text>;
+        : <Text style={[styles.nopeText, this.props.nopeTextStyle]}>{this.props.nopeText}</Text>
 
-      return (<Animated.View style={[styles.nope, animatedNopeStyles]}>
-        {inner}
-      </Animated.View>);
+      return <Animated.View style={[styles.nope, this.props.nopeStyle, animatedNopeStyles]}>
+                {inner}
+              </Animated.View>;
     }
 
     return null;
@@ -500,11 +504,11 @@ export default class SwipeCards extends Component {
     if (this.props.showMaybe) {
       const inner = this.props.maybeView
         ? this.props.maybeView
-        : <Text style={styles.maybeText}>{this.props.maybeText}</Text>;
+        : <Text style={[styles.maybeText, this.props.maybeTextStyle]}>{this.props.maybeText}</Text>
 
-      return (<Animated.View style={[styles.maybe, animatedMaybeStyles]}>
-        {inner}
-      </Animated.View>);
+      return <Animated.View style={[styles.maybe, this.props.maybeStyle, animatedMaybeStyles]}>
+                {inner}
+              </Animated.View>;
     }
 
     return null;
@@ -524,11 +528,11 @@ export default class SwipeCards extends Component {
     if (this.props.showYup) {
       const inner = this.props.yupView
         ? this.props.yupView
-        : <Text style={styles.yupText}>{this.props.yupText}</Text>;
+        : <Text style={[styles.yupText, this.props.yupTextStyle]}>{this.props.yupText}</Text>;
 
-      return (<Animated.View style={[styles.yup, animatedYupStyles]}>
-        {inner}
-      </Animated.View>);
+       return <Animated.View style={[styles.yup, this.props.yupStyle, animatedYupStyles]}>
+                {inner}
+              </Animated.View>;
     }
 
     return null;
